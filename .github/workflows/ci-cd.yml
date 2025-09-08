@@ -20,6 +20,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env file from secrets
+        run: |
+          echo "REACT_APP_COGNITO_REGION=${{ secrets.REACT_APP_COGNITO_REGION }}" >> .env
+          echo "REACT_APP_COGNITO_USER_POOL_ID=${{ secrets.REACT_APP_COGNITO_USER_POOL_ID }}" >> .env
+          echo "REACT_APP_COGNITO_CLIENT_ID=${{ secrets.REACT_APP_COGNITO_CLIENT_ID }}" >> .env
+        shell: bash
+
       - name: Build frontend
         run: npm run build
 
