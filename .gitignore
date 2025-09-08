@@ -5,6 +5,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Production build
+build/
 dist/
 
 # Environment variables
@@ -61,4 +62,4 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+#.env
