@@ -1,0 +1,56 @@
+/* CSS 변수 정의 */
+:root {
+  --default-bg: #d6dee7;
+  --darker-bg: #c8cfd6;
+  --dark-navy: #3e4a5b;
+  --darker-navy: #353f4d;
+  --black-navy: #1f242b;
+  --black: #090b0c;
+  --white-shine: #fff;
+  --white: #fafafa;
+  --white-shadow: #ececec;
+  --text-default: #1e293b;
+  --text-light: #2c384a;
+  --placeholder-grey: #707274d8;
+  --placeholder-white: #eff2f5d8;
+  --title: #1e293b;
+  --subtitle: #485362;
+  --posttitle: #1d2025;
+  --red-alert: #ad0d0d;
+  --primary: hsl(222.2 47.4% 11.2%);
+  --primary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(210 40% 96%);
+  --secondary-foreground: hsl(222.2 84% 4.9%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --accent: hsl(210 40% 96%);
+  --accent-foreground: hsl(222.2 84% 4.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(222.2 84% 4.9%);
+  --radius: 0.625rem;
+}
+
+/* 기본 스타일 */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--default-bg);
+  overflow-x: hidden; /* Optional: Prevents scrollbars if content overflows */
+  overflow-y:auto;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted-foreground);
+}

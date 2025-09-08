@@ -1,0 +1,204 @@
+@import url(../index.css);
+
+.write-post-container {
+  background-color: var(--white);
+  padding: 40px;
+  margin: 20px 40px;
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 뒤로가기 버튼 */
+.back-button-container {
+  margin-bottom: 16px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--subtitle);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0px 16px;
+  transition: all 0.2s ease;
+}
+
+.write-post-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 12px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.write-post-title {
+    font-size: 28px;
+    color: var(--title);
+}
+
+.write-post-actions {
+    width: fit-content;
+    flex-direction: row;
+    align-items: top;
+    justify-content: flex-end;
+}
+
+.write-post-actions button {
+    width: fit-content;
+    padding: 8px 12px;
+    margin: 0 12px;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px solid var(--dark-navy);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: var(--white);
+    color: var(--darker-navy);
+}
+
+.save-btn {
+    background-color: var(--dark-navy);
+    color: var(--white-shine);
+}
+
+.error-message {
+    font-size: 16px;
+    color: var(--text-default);
+}
+
+
+/* 게시글 작성 폼 */
+.write-post-form {
+    display: grid;
+    gap: 12px; /* Uniform gap between grid items */
+    width: 100%;
+    margin: 0 auto; /* Centers the form horizontally */
+    padding: 12px;
+}
+
+.post-form-group {
+    display: grid;
+    grid-template-columns: 80px 2fr 60px; 
+    align-items: center; /* Vertically aligns items in the grid row */
+    gap: 12px; /* Gap between the label and the input/select */
+    margin-bottom: 12px;
+}
+
+.post-form-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--subtitle);
+    white-space: nowrap;
+}
+
+/* Styles for title */
+.write-form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background-color: var(--white-shadow);
+    border-radius: var(--radius);
+    font-size: 16px;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+.write-form-input:focus {
+    outline: none;
+}
+
+.write-form-input::placeholder {
+    color: var(--placeholder-grey);
+}
+
+.post-char-count {
+    font-size: 14px;
+    color: var(--subtitle);
+    white-space: nowrap;
+    justify-self: end;
+}
+
+#title {
+    color: var(--title);
+    font-size: 21px;
+}
+
+/* Styles for the select dropdown */
+.post-form-select {
+  width: 128px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--white-shine);
+  background-color: var(--dark-navy);
+  border: 1px solid var(--darker-navy);
+  border-radius: var(--radius);
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.post-form-select:focus {
+  outline: none;
+  border-color: var(--white-shadow);
+}
+
+/* Styles for content text */
+.post-form-textarea {
+    width: 100%;
+    height: fit-content;
+    min-height: 2vw;
+    resize: none;
+    padding: 12px 12px;
+    border: none;
+    border-radius: var(--radius);
+    background-color:var(--white-shadow);
+    color: var(--text-default);
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-form-textarea:focus {
+    outline: none;
+}
+
+.post-form-textarea:placeholder {
+    color: var(--placeholder-grey);
+}
+
+/* 수정 모드에서 카테고리 비활성화 스타일 (추가됨) */
+.post-form-select.disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.post-form-select.disabled:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* 카테고리 입력 컨테이너 (추가됨) */
+.category-input-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.disabled-hint {
+    font-size: 12px;
+    color: #6b7280;
+    font-style: italic;
+    white-space: nowrap;
+}
+
