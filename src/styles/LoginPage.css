@@ -122,9 +122,9 @@
 .auth-button {
   align-content: center;
   justify-content: center;
-  width: 120px;
+  width: auto;
   margin: 12px 0;
-  padding: 14px;
+  padding: 14px 28px;
   border: none;
   border-radius: 999px;
   background-color: var(--dark-navy);

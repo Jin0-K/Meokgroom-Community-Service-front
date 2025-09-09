@@ -202,7 +202,7 @@ class ForgotPasswordPage extends Component {
         {error && <div className="error-message">{error}</div>}
 
         <div className="auth-form" onSubmit={this.requestResetCode}>
-          <div className="form-group">
+          {/* <div className="form-group">
             <label className="form-label">
               사용자명
             </label>
@@ -217,7 +217,7 @@ class ForgotPasswordPage extends Component {
                 required
               />
             </div>
-          </div>
+          </div> */}
           <div className="form-group">
             <label className="form-label">
               이메일 주소
