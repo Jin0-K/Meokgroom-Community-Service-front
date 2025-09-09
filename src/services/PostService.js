@@ -1,6 +1,6 @@
 class PostService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_POST_SERVICE_URL || 'http://localhost:8082';
+    this.baseURL = process.env.REACT_APP_POST_SERVICE_URL || 'http://www.hhottdogg.shop';
   }
 
   // 인증 헤더 생성

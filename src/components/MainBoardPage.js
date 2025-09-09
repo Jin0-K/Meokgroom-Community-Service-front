@@ -40,7 +40,7 @@ class MainBoardPage extends Component {
 
   loadPosts = async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/v1/posts');
+      const response = await fetch('https://www.hhottdogg.shop/api/v1/posts');
       if (!response.ok) {
         throw new Error('게시글을 가져오는데 실패했습니다.');
       }

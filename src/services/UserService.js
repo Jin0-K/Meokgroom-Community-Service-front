@@ -1,6 +1,6 @@
 class UserService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:8081';
+    this.baseURL = process.env.REACT_APP_USER_SERVICE_URL || 'http://www.hhottdogg.shop';
   }
 
   // 인증 헤더 생성

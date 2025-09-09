@@ -48,7 +48,7 @@ class PostDetails extends Component {
     if (!this.state.post || !this.props.isLoggedIn || !this.props.currentUser?.sub) return;
     
     try {
-      const response = await fetch(`http://localhost:8081/api/v1/posts/${this.state.post.id}/like/status?user_id=${this.props.currentUser.sub}`);
+      const response = await fetch(`http://www.hhottdogg.shop/api/v1/posts/${this.state.post.id}/like/status?user_id=${this.props.currentUser.sub}`);
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
@@ -79,7 +79,7 @@ class PostDetails extends Component {
         user_id: this.props.currentUser.sub
       };
       
-      const response = await fetch(`http://localhost:8081/api/v1/posts/${this.state.post.id}/like`, {
+      const response = await fetch(`http://www.hhottdogg.shop/api/v1/posts/${this.state.post.id}/like`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -112,7 +112,7 @@ class PostDetails extends Component {
   fetchPostDetail = async () => {
     try {
       const postId = this.props.params.postId;
-      const response = await fetch(`http://localhost:8081/api/v1/posts/${postId}`);
+      const response = await fetch(`http://www.hhottdogg.shop/api/v1/posts/${postId}`);
       
       if (!response.ok) {
         throw new Error('게시글을 가져오는데 실패했습니다.');
@@ -338,7 +338,7 @@ class PostDetails extends Component {
     }
 
     try {
-      const response = await fetch(`http://localhost:8081/api/v1/posts/${postId}`, {
+      const response = await fetch(`http://www.hhottdogg.shop/api/v1/posts/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
