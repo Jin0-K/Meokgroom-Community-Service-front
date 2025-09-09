@@ -177,7 +177,7 @@ class SignupPage extends Component {
                 value={email}
                 onChange={this.handleChange}
                 className="form-input"
-                placeholder="you@example.com"
+                placeholder="example@email.com"
                 required
               />
               <p className='password-toggle'/>

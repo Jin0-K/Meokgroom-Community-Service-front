@@ -196,7 +196,7 @@ class ForgotPasswordPage extends Component {
       <div className="auth-container">
         <div className="auth-header">
           <h1 className="auth-title">비밀번호 찾기</h1>
-          <p className="auth-subtitle">아이디와 이메일을 입력해주세요요.</p>
+          <p className="auth-subtitle">이메일을 입력해주세요요.</p>
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -204,8 +204,7 @@ class ForgotPasswordPage extends Component {
         <form className="auth-form" onSubmit={this.requestResetCode}>
           <div className="form-group">
             <label className="form-label">
-              <UserIcon size={16} />
-              ID
+              사용자명
             </label>
             <input
               type="text"
@@ -213,7 +212,7 @@ class ForgotPasswordPage extends Component {
               value={username}
               onChange={this.handleInputChange}
               className="form-input"
-              placeholder="ID"
+              placeholder="닉네임"
               required
             />
           </div>
