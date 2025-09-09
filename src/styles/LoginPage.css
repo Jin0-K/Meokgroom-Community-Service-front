@@ -52,6 +52,7 @@
   justify-content: center;
   max-width: 600px;
   padding: 0 8px;
+  margin: 0 auto;
   gap: 12px;
 }
 

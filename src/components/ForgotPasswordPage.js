@@ -196,45 +196,49 @@ class ForgotPasswordPage extends Component {
       <div className="auth-container">
         <div className="auth-header">
           <h1 className="auth-title">비밀번호 찾기</h1>
-          <p className="auth-subtitle">이메일을 입력해주세요요.</p>
+          <p className="auth-subtitle">이메일을 입력해주세요.</p>
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
-        <form className="auth-form" onSubmit={this.requestResetCode}>
+        <div className="auth-form" onSubmit={this.requestResetCode}>
           <div className="form-group">
             <label className="form-label">
               사용자명
             </label>
-            <input
-              type="text"
-              name="username"
-              value={username}
-              onChange={this.handleInputChange}
-              className="form-input"
-              placeholder="닉네임"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="text"
+                name="username"
+                value={username}
+                onChange={this.handleInputChange}
+                className="form-input"
+                placeholder="닉네임"
+                required
+              />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">
               이메일 주소
             </label>
-            <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={this.handleInputChange}
-              className="form-input"
-              placeholder="example@email.com"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={this.handleInputChange}
+                className="form-input"
+                placeholder="example@email.com"
+                required
+              />
+            </div>
           </div>
 
           <button type="submit" className="auth-button" disabled={isLoading}>
             {isLoading ? '전송 중...' : '인증 코드 받기'}
           </button>
-        </form>
+        </div>
 
         <div className="auth-footer">
           <button onClick={() => this.props.navigate('/login')} className="auth-link">
