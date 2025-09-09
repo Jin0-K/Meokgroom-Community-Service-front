@@ -6,26 +6,25 @@ import { userPool } from '../aws-config';
 
 class ForgotPasswordPage extends Component {
   constructor(props) {
-          super(props);
-      this.state = {
-        // 1단계 입력(username + 이메일)
-        username: '',
-        email: '',
- 
-        // 2단계 입력
-        confirmationCode: '',
-        newPassword: '',
-        confirmPassword: '',        
-        showNewPassword: false,
-        showConfirmPassword: false,
- 
-        // 내부 상태
-        usernameForCognito: '',           // ← 입력한 username을 저장
-        currentStep: 1,                   // 1: 코드요청, 2: 비번변경
-        isLoading: false,
-        error: null,
-        success: null,
-      };
+    super(props);
+    this.state = {
+      // username 제거, email만 사용
+      email: '',
+
+      // 2단계 입력
+      confirmationCode: '',
+      newPassword: '',
+      confirmPassword: '',        
+      showNewPassword: false,
+      showConfirmPassword: false,
+
+      // 내부 상태
+      usernameForCognito: '',           // ← 제거 예정
+      currentStep: 1,                   // 1: 코드요청, 2: 비번변경
+      isLoading: false,
+      error: null,
+      success: null,
+    };
   }
 
   // ===== 유틸 =====
@@ -48,18 +47,18 @@ class ForgotPasswordPage extends Component {
   };
 
   /**
-   * (선택) 백엔드에서 username+email 매핑 검증 API가 있을 경우 사용
-   * .env: REACT_APP_USERNAME_EMAIL_VERIFY_URL (POST, body: { username, email })
+   * (선택) 백엔드에서 email 검증 API가 있을 경우 사용
+   * .env: REACT_APP_EMAIL_VERIFY_URL (POST, body: { email })
    * 응답 예: { "valid": true }
    */
-  verifyUsernameEmail = async (username, email) => {
-    const base = process.env.REACT_APP_USERNAME_EMAIL_VERIFY_URL;
+  verifyEmail = async (email) => {
+    const base = process.env.REACT_APP_EMAIL_VERIFY_URL;
     if (!base) return true; // 백엔드 검증이 없으면 프론트만으로 진행
     try {
       const res = await fetch(base, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email })
+        body: JSON.stringify({ email })
       });
       if (!res.ok) return false;
       const data = await res.json().catch(() => ({}));
@@ -72,48 +71,41 @@ class ForgotPasswordPage extends Component {
   // ===== 1단계: 인증코드 발송 =====
   requestResetCode = async (e) => {
     e.preventDefault();
-    const { username, email } = this.state;
+    const { email } = this.state;
 
-    if (!username) return this.setState({ error: '사용자명을 입력해주세요.' });
     if (!email) return this.setState({ error: '이메일을 입력해주세요.' });
     if (!this.validateEmail(email)) return this.setState({ error: '유효한 이메일 형식을 입력해주세요.' });
-
-
 
     this.setState({ isLoading: true, error: null, success: null });
 
     try {
-      // (선택) 서버에서 username+email 매핑 검증
-      const verified = await this.verifyUsernameEmail(username, email);
+      // (선택) 서버에서 email 검증
+      const verified = await this.verifyEmail(email);
       if (!verified) {
-        this.setState({ isLoading: false, error: '입력한 사용자명과 이메일이 일치하지 않습니다.' });
+        this.setState({ isLoading: false, error: '입력한 이메일을 찾을 수 없습니다.' });
         return;
       }
 
       // 2) Cognito forgotPassword 호출
-      const user = new CognitoUser({ Username: username, Pool: userPool });
+      const user = new CognitoUser({ Username: email, Pool: userPool });
       user.forgotPassword({
         onSuccess: () => {
           this.setState({
             isLoading: false,
             currentStep: 2,
             success: '인증 코드가 등록된 이메일로 발송되었습니다.',
-            usernameForCognito: username,
+            usernameForCognito: email,
           });
         },
         onFailure: (err) => {
           console.error('forgotPassword error', err);
-          
-
-          
           const map = {
-            UserNotFoundException: '해당 사용자명을 찾을 수 없습니다.',
+            UserNotFoundException: '해당 이메일을 찾을 수 없습니다.',
             CodeDeliveryFailureException: '이메일 발송에 실패했습니다. Cognito 설정을 확인하세요.',
             LimitExceededException: '요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.',
             InvalidParameterException: '연락처(이메일)가 등록/검증되어 있지 않습니다.',
             NotAuthorizedException: '계정이 확인되지 않았습니다. 이메일 인증 후 다시 시도하세요.',
           };
-          
           const msg = map[err?.code] || err?.message || '코드 발송에 실패했습니다.';
           this.setState({ isLoading: false, error: msg });
         },
@@ -121,7 +113,7 @@ class ForgotPasswordPage extends Component {
           this.setState({
             isLoading: false,
             currentStep: 2,
-            usernameForCognito: username,
+            usernameForCognito: email,
           });
         },
       });
@@ -147,7 +139,7 @@ class ForgotPasswordPage extends Component {
         error: '비밀번호는 최소 8자 이상이며, 소문자, 숫자, 특수문자를 포함해야 합니다.',
       });
 
-    // 1단계에서 저장해둔 usernameForCognito 사용 (백엔드 조회 결과 또는 이메일 그대로)
+    // email을 Cognito username으로 사용
     const username = usernameForCognito;
     const user = new CognitoUser({ Username: username, Pool: userPool });
 
@@ -159,16 +151,12 @@ class ForgotPasswordPage extends Component {
       },
       onFailure: (err) => {
         console.error('confirmPassword error', err);
-        
-
-        
         const map = {
           ExpiredCodeException: '인증 코드가 만료되었습니다. 코드를 다시 요청하세요.',
           CodeMismatchException: '인증 코드가 일치하지 않습니다. 다시 확인해주세요.',
           InvalidPasswordException: '비밀번호가 Cognito 정책에 맞지 않습니다. 조건을 확인해주세요.',
           LimitExceededException: '요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.',
         };
-        
         const msg = map[err?.code] || err?.message || '비밀번호 변경에 실패했습니다.';
         this.setState({ isLoading: false, error: msg });
       },
@@ -179,7 +167,7 @@ class ForgotPasswordPage extends Component {
   goBackToStep1 = () => {
     this.setState({
       currentStep: 1,
-      username: '',
+      email: '',
       confirmationCode: '',
       newPassword: '',
       confirmPassword: '',
@@ -190,7 +178,7 @@ class ForgotPasswordPage extends Component {
 
   // ===== UI =====
   renderStep1() {
-    const { username, email, isLoading, error } = this.state;
+    const { email, isLoading, error } = this.state;
 
     return (
       <div className="auth-container">
@@ -201,23 +189,7 @@ class ForgotPasswordPage extends Component {
 
         {error && <div className="error-message">{error}</div>}
 
-        <div className="auth-form" onSubmit={this.requestResetCode}>
-          {/* <div className="form-group">
-            <label className="form-label">
-              사용자명
-            </label>
-            <div className="form-input-container">
-              <input
-                type="text"
-                name="username"
-                value={username}
-                onChange={this.handleInputChange}
-                className="form-input"
-                placeholder="닉네임"
-                required
-              />
-            </div>
-          </div> */}
+        <form className="auth-form" onSubmit={this.requestResetCode}>
           <div className="form-group">
             <label className="form-label">
               이메일 주소
@@ -238,7 +210,7 @@ class ForgotPasswordPage extends Component {
           <button type="submit" className="auth-button" disabled={isLoading}>
             {isLoading ? '전송 중...' : '인증 코드 받기'}
           </button>
-        </div>
+        </form>
 
         <div className="auth-footer">
           <button onClick={() => this.props.navigate('/login')} className="auth-link">
@@ -259,6 +231,7 @@ class ForgotPasswordPage extends Component {
       isLoading,
       error,
       success,
+      email,
     } = this.state;
 
     return (
