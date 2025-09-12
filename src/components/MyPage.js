@@ -84,7 +84,7 @@ class MyPage extends Component {
   handleDeletePost = async (postId) => {
     if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
       try {
-        const response = await fetch(`http://localhost:8081/api/v1/posts/${postId}`, {
+        const response = await fetch(`https://www.hhottdogg.shop/api/v1/posts/${postId}`, {
           method: 'DELETE'
         });
         

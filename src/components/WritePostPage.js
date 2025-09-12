@@ -113,12 +113,12 @@ class WritePostPage extends Component {
       username: actualUsername,
     };
 
-    let url = `http://localhost:8081/api/v1/posts`;
+    let url = `https://www.hhottdogg.shop/api/v1/posts`;
     let method = 'POST';
 
     if (postId) {
       // If postId exists, it's an update operation
-      url = `http://localhost:8081/api/v1/posts/${postId}`;
+      url = `https://www.hhottdogg.shop/api/v1/posts/${postId}`;
       method = 'PATCH';
     }
     try {
