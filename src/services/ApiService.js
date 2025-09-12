@@ -12,9 +12,9 @@ class ApiService {
   // 서비스 상태 확인
   async checkServiceHealth() {
     const services = [
-      { name: 'User Service', url: process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:8081' },
-      { name: 'Post Service', url: process.env.REACT_APP_POST_SERVICE_URL || 'http://localhost:8082' },
-      { name: 'Comment Service', url: process.env.REACT_APP_COMMENT_SERVICE_URL || 'http://localhost:8083' }
+      { name: 'User Service', url: process.env.REACT_APP_USER_SERVICE_URL || 'https://www.hhottdogg.shop' },
+      { name: 'Post Service', url: process.env.REACT_APP_POST_SERVICE_URL || 'https://www.hhottdogg.shop' },
+      { name: 'Comment Service', url: process.env.REACT_APP_COMMENT_SERVICE_URL || 'https://www.hhottdogg.shop' }
     ];
 
     const healthChecks = await Promise.allSettled(
