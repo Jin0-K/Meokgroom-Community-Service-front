@@ -46,7 +46,7 @@ class WritePostPage extends Component {
   fetchPostForEdit = async (postId) => {
     this.setState({ isLoading: true });
     try {
-      const response = await fetch(`http://www.hhottdogg.shop/api/v1/posts/${postId}`);
+      const response = await fetch(`https://www.hhottdogg.shop/api/v1/posts/${postId}`);
       if (!response.ok) {
         throw new Error('게시글을 불러오는데 실패했습니다.');
       }
