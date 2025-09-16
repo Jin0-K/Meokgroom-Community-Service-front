@@ -539,7 +539,8 @@ class PostDetails extends Component {
             
             {/* 댓글 목록 */}
             <div className="comments-list">
-              {comments.length > 0 ? (
+              { isLoggedIn ? (
+              comments.length > 0 ? (
                 comments.map((comment, index) => (
                   <div key={index} className="comment-item">
                     <div className="comment-meta">
@@ -600,6 +601,8 @@ class PostDetails extends Component {
                   ))
                 ) : (
                   <p className="no-comments">아직 댓글이 없습니다.</p>
+                )
+              ) : ( <p className="login-prompt">댓글을 보려면 로그인하세요.</p>
                 )}
               </div>
             </div>
