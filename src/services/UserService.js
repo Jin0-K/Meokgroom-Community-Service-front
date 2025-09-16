@@ -171,7 +171,7 @@ class UserService {
   // 계정 비활성화(탈퇴)
   async deactivateAccount() {
     try {
-      const url = `${this.baseURL}/api/v1/users/me/deactivate`;
+      const url = `${this.baseURL}/users/me/deactivate`;
 
       const response = await fetch(url, {
         method: 'POST',
