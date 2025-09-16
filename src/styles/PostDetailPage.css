@@ -327,6 +327,13 @@
   font-style: italic;
 }
 
+.login-prompt {
+  text-align: center;
+  color: var(--subtitle);
+  font-style: italic;
+  margin: 16px 0;
+}
+
 .comment-editing {
   display: flex;
   flex-direction: row;
