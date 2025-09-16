@@ -41,6 +41,10 @@ class PostDetails extends Component {
     if (this.state.post && !prevState.post && this.props.isLoggedIn && this.props.currentUser?.sub) {
       this.checkLikeStatus();
     }
+    // 로그인 상태가 변경될 때 댓글 목록을 다시 불러옵니다.
+    if (prevProps.isLoggedIn !== this.props.isLoggedIn) {
+      this.fetchComments();
+    }
   }
 
   // 좋아요 상태 확인
@@ -143,19 +147,28 @@ class PostDetails extends Component {
         // 백엔드 응답 구조와 일치: data.comments에 댓글 배열이 저장됨
         const comments = result.data.comments || [];
         this.setState({ comments });
-        // 댓글별 좋아요 상태 초기화
-        this.initCommentLikeStatus(comments);
+        // 로그인 상태일 때만 좋아요 상태를 초기화합니다.
+        if (this.props.isLoggedIn) {
+          this.initCommentLikeStatus(comments);
+        } else {
+          // 로그아웃 상태에서는 좋아요 상태를 모두 false로 초기화합니다.
+          const defaultStatus = Object.fromEntries(
+            (comments || []).map(c => [c.id, false])
+          );
+          this.setState({ commentLikeStatus: defaultStatus });
+        }
       } else {
         this.setState({ comments: [] });
       }
     } catch (error) {
-      console.warn('댓글 목록 조회 실패 (로그인 상태 유지):', error.message);
+      console.warn('댓글 목록 조회 실패:', error.message);
       // 에러 발생 시에도 로그인 상태는 유지하고 댓글만 빈 배열로 설정
       this.setState({ comments: [] });
       
       // 인증 관련 에러인 경우에만 사용자에게 알림
       if (error.message.includes('인증') || error.message.includes('토큰')) {
-        console.warn('인증 관련 에러로 댓글을 불러올 수 없습니다. 로그인 상태는 유지됩니다.');
+        console.warn('인증 관련 문제로 댓글을 불러올 수 없습니다.');
+        this.setState({ comments: [] });
       }
     }
   };
@@ -507,11 +520,11 @@ class PostDetails extends Component {
               </div>
             </article>
 
-          {/* ✅ 통합: 댓글 섹션 추가 */}
+          {/* 통합: 댓글 섹션 추가 */}
           <div className="comments-section">
             <h2>댓글 ({comments.length})</h2>
             
-            {/* 댓글 입력 폼 */}
+            {/* 댓글 입력 폼: 로그인 상태에서만 표시 */}
             {isLoggedIn && (
               <form className="comment-form" onSubmit={this.handleCommentSubmit}>
                 <input

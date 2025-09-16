@@ -84,10 +84,10 @@ class CommentService {
   async getComments(postId, accessToken = null, params = {}) {
     try {
       // accessToken이 제공되지 않은 경우 자동으로 가져오기
-      if (!accessToken) {
-        const headers = this.getAuthHeaders();
-        accessToken = headers.Authorization.replace('Bearer ', '');
-      }
+      // if (!accessToken) {
+      //   const headers = this.getAuthHeaders();
+      //   accessToken = headers.Authorization.replace('Bearer ', '');
+      // }
       
       const queryParams = new URLSearchParams();
       
@@ -100,8 +100,11 @@ class CommentService {
       
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        // 'Authorization': `Bearer ${accessToken}`
       };
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
       
       const response = await fetch(url, {
         method: 'GET',
