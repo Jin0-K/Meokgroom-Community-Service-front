@@ -51,7 +51,7 @@ class MyPage extends Component {
       }
 
       // 백엔드에서 사용자가 작성한 글 가져오기
-      const response = await fetch(`http://www.hhottdogg.shop/api/v1/posts?user_id=${actualSub}`, {
+      const response = await fetch(`https://www.hhottdogg.shop/api/v1/posts?user_id=${actualSub}`, {
         headers: headers
       });
       if (response.ok) {
