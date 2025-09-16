@@ -427,6 +427,7 @@ class PostDetails extends Component {
         onCategoryChange={(category) => {
           this.props.navigate(`/?category=${encodeURIComponent(category)}`);
         }}
+        onLogout={this.props.onLogout}
       >
         {/* 뒤로가기 버튼 */}
         <div className="back-button-container">

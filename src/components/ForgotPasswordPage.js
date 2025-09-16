@@ -247,16 +247,19 @@ class ForgotPasswordPage extends Component {
         <form className="auth-form" onSubmit={this.confirmNewPassword}>
           <div className="form-group">
             <label className="form-label">인증 코드</label>
-            <input
-              type="text"
-              name="confirmationCode"
-              value={confirmationCode}
-              onChange={this.handleInputChange}
-              className="form-input"
-              placeholder="6자리 인증 코드를 입력하세요"
-              maxLength="6"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="text"
+                name="confirmationCode"
+                value={confirmationCode}
+                onChange={this.handleInputChange}
+                className="form-input"
+                placeholder="6자리 인증 코드를 입력하세요"
+                maxLength="6"
+                required
+              />
+              <p className='password-toggle'/>
+            </div>
           </div>
 
           <div className="form-group">

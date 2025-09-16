@@ -188,7 +188,7 @@ class LoginPage extends Component {
             <form className="auth-form" onSubmit={this.handleLogin}>
               <div className="form-group">
                 <label className="form-label">
-                  이메일
+                  사용자명
                 </label>
                 <div className='form-input-container'>
                   <input
@@ -197,7 +197,7 @@ class LoginPage extends Component {
                     value={username}
                     onChange={this.handleInputChange}
                     className="form-input"
-                    placeholder="이메일을 입력하세요"
+                    placeholder="닉네임을 입력하세요"
                     required
                   />
                   <p className='password-toggle'/>
