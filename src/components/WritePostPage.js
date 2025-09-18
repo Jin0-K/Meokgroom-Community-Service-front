@@ -23,6 +23,8 @@ class WritePostPage extends Component {
       uploadProgress: 0
     };
     this.categories = ["자유", "동물/반려동물", "여행", "건강/헬스", "연예인"];
+    // 업로드 입력 참조
+    this.fileInputRef = React.createRef();
   }
 
   componentDidMount() {
@@ -449,7 +451,7 @@ class WritePostPage extends Component {
                 className="image-upload-area"
                 onDrop={this.handleDrop}
                 onDragOver={this.handleDragOver}
-                onClick={() => document.getElementById('image-upload').click()}
+                onClick={() => this.fileInputRef.current && this.fileInputRef.current.click()}
               >
                 <div className="upload-content">
                   <Image size={48} className="upload-icon" />
@@ -457,18 +459,19 @@ class WritePostPage extends Component {
                   <p className="upload-hint">JPG, PNG, GIF, WebP (최대 5MB)</p>
                 </div>
                 <input
+                  ref={this.fileInputRef}
                   type="file"
                   multiple
                   accept="image/*"
                   onChange={this.handleFileSelect}
                   className="file-input"
-                  id="image-upload"
+                  id="image-upload-input"
                 />
               </div>
               
               {/* 또는 버튼으로 업로드 */}
               <div className="simple-image-upload">
-                <label htmlFor="image-upload" className="simple-upload-button">
+                <label htmlFor="image-upload-input" className="simple-upload-button">
                   <Upload size={16} />
                   파일 선택
                 </label>
