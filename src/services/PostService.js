@@ -1,3 +1,5 @@
+import { createAuthHeaders } from '../utils/tokenUtils';
+
 class PostService {
   constructor() {
     this.baseURL = process.env.REACT_APP_POST_SERVICE_URL || 'https://www.hhottdogg.shop/api/v1';
@@ -6,7 +8,6 @@ class PostService {
   // 인증 헤더 생성
   getAuthHeaders() {
     // 공통 토큰 유틸리티 사용
-    const { createAuthHeaders } = require('../utils/tokenUtils');
     return createAuthHeaders();
   }
 
@@ -182,6 +183,89 @@ class PostService {
       console.error('내 게시글 조회 오류:', error);
       throw error;
     }
+  }
+
+  // S3 업로드 권한 확인
+  async checkMediaPermissions() {
+    try {
+      const response = await fetch(`${this.baseURL}/posts/media/check-permissions`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`권한 확인 실패: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('권한 확인 오류:', error);
+      throw error;
+    }
+  }
+
+  // 이미지 파일 업로드
+  async uploadImage(postId, file) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers = this.getAuthHeaders();
+      // FormData 사용 시 Content-Type 헤더는 브라우저가 자동 설정하도록 제거
+      delete headers['Content-Type'];
+
+      const response = await fetch(`${this.baseURL}/posts/${postId}/media`, {
+        method: 'POST',
+        headers: headers,
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `이미지 업로드 실패: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error);
+      throw error;
+    }
+  }
+
+  // 이미지 파일 삭제
+  async deleteImage(postId, mediaId) {
+    try {
+      const response = await fetch(`${this.baseURL}/posts/${postId}/media/${mediaId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `이미지 삭제 실패: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('이미지 삭제 오류:', error);
+      throw error;
+    }
+  }
+
+  // 파일 검증
+  validateImageFile(file) {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    
+    if (file.size > maxSize) {
+      throw new Error('파일 크기는 5MB 이하여야 합니다.');
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('지원하지 않는 파일 형식입니다. (jpg, jpeg, png, gif, webp만 지원)');
+    }
+    
+    return true;
   }
 }
 

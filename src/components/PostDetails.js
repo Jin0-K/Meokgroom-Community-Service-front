@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { ArrowLeft, Heart, User } from 'lucide-react';
 import CommonLayout from './CommonLayout';
 import CommentService from '../services/CommentService';
+import PostService from '../services/PostService';
 import '../styles/PostDetailPage.css';
 
 // useParams를 클래스 컴포넌트에서 사용하기 위한 래퍼
@@ -116,23 +117,18 @@ class PostDetails extends Component {
   fetchPostDetail = async () => {
     try {
       const postId = this.props.params.postId;
-      const response = await fetch(`https://www.hhottdogg.shop/api/v1/posts/${postId}`);
+      const result = await PostService.getPost(postId);
       
-      if (!response.ok) {
-        throw new Error('게시글을 가져오는데 실패했습니다.');
-      }
-      
-      const data = await response.json();
       this.setState({ 
-        post: data.post || data.data, 
+        post: result.data || result.post || result, 
         isLoading: false 
       });
-         } catch (error) {
-       this.setState({ 
-         error: error.message, 
-         isLoading: false 
-       });
-     }
+    } catch (error) {
+      this.setState({ 
+        error: error.message, 
+        isLoading: false 
+      });
+    }
   };
 
     // 댓글 목록을 가져오는 함수
@@ -508,6 +504,29 @@ class PostDetails extends Component {
               <div className="post-content">
                 {post.content}
               </div>
+
+              {/* 게시글 이미지 */}
+              {post.media_files && post.media_files.length > 0 && (
+                <div className="post-images">
+                  <h3>첨부 이미지 ({post.media_files.length}개)</h3>
+                  <div className="post-images-grid">
+                    {post.media_files.map((media) => (
+                      <div key={media.id} className="post-image-item">
+                        <img 
+                          src={media.s3_url} 
+                          alt={media.file_name}
+                          className="post-image"
+                          onClick={() => window.open(media.s3_url, '_blank')}
+                        />
+                        <div className="image-caption">
+                          <span className="image-name">{media.file_name}</span>
+                          <span className="image-size">{(media.file_size / 1024 / 1024).toFixed(2)}MB</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 하단: 좋아요 버튼과 좋아요 수 */}
               <div className="post-actions">

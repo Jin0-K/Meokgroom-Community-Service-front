@@ -224,3 +224,29 @@
   color: #1e293b;
 }
 
+/* 게시글 제목과 이미지 표시 스타일 */
+.post-title-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.post-title-text {
+  display: block;
+}
+
+.post-image-indicator {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.image-count {
+  font-size: 12px;
+  color: var(--subtitle);
+  background-color: var(--white-shadow);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+

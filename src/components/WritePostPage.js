@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { User, ArrowLeft, Save, X } from 'lucide-react';
+import { User, ArrowLeft, Save, X, Upload, Image, Trash2 } from 'lucide-react';
 import CommonLayout from './CommonLayout';
 import "../styles/WritePostPage.css"
 import { decodeToken, getCognitoToken } from '../utils/tokenUtils';
+import PostService from '../services/PostService';
 
 class WritePostPage extends Component {
   constructor(props) {
@@ -14,7 +15,12 @@ class WritePostPage extends Component {
       content: "",
       category: "자유",
       isLoading: false,
-      error: null
+      error: null,
+      // 이미지 관련 상태
+      selectedFiles: [],
+      uploadedImages: [],
+      isUploading: false,
+      uploadProgress: 0
     };
     this.categories = ["자유", "동물/반려동물", "여행", "건강/헬스", "연예인"];
   }
@@ -38,7 +44,16 @@ class WritePostPage extends Component {
         this.setState({ postId: newPostId });
         this.fetchPostForEdit(newPostId);
       } else {
-        this.setState({ postId: null, title: "", content: "", category: "자유" });
+        this.setState({ 
+          postId: null, 
+          title: "", 
+          content: "", 
+          category: "자유",
+          selectedFiles: [],
+          uploadedImages: [],
+          isUploading: false,
+          uploadProgress: 0
+        });
       }
     }
   }
@@ -46,17 +61,15 @@ class WritePostPage extends Component {
   fetchPostForEdit = async (postId) => {
     this.setState({ isLoading: true });
     try {
-      const response = await fetch(`https://www.hhottdogg.shop/api/v1/posts/${postId}`);
-      if (!response.ok) {
-        throw new Error('게시글을 불러오는데 실패했습니다.');
-      }
-      const data = await response.json();
-      const post = data.post || data.data;
+      const result = await PostService.getPost(postId);
+      const post = result.data || result.post || result;
       if (post) {
         this.setState({
           title: post.title,
           content: post.content,
           category: post.category,
+          uploadedImages: post.media_files || [],
+          postId: postId, // 수정 모드에서 postId 설정
           isLoading: false
         });
       }
@@ -72,6 +85,111 @@ class WritePostPage extends Component {
 
   handleInputChange = (field, value) => {
     this.setState({ [field]: value });
+  };
+
+  // 파일 선택 핸들러
+  handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = [];
+    
+    files.forEach(file => {
+      try {
+        PostService.validateImageFile(file);
+        validFiles.push(file);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+    
+    if (validFiles.length > 0) {
+      this.setState(prevState => ({
+        selectedFiles: [...prevState.selectedFiles, ...validFiles]
+      }));
+    }
+  };
+
+  // 드래그 앤 드롭 핸들러
+  handleDrop = (e) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    const validFiles = [];
+    
+    files.forEach(file => {
+      try {
+        PostService.validateImageFile(file);
+        validFiles.push(file);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+    
+    if (validFiles.length > 0) {
+      this.setState(prevState => ({
+        selectedFiles: [...prevState.selectedFiles, ...validFiles]
+      }));
+    }
+  };
+
+  handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  // 선택된 파일 제거
+  removeSelectedFile = (index) => {
+    this.setState(prevState => ({
+      selectedFiles: prevState.selectedFiles.filter((_, i) => i !== index)
+    }));
+  };
+
+  // 업로드된 이미지 제거
+  removeUploadedImage = async (mediaId) => {
+    if (!this.state.postId) return;
+    
+    try {
+      await PostService.deleteImage(this.state.postId, mediaId);
+      this.setState(prevState => ({
+        uploadedImages: prevState.uploadedImages.filter(img => img.id !== mediaId)
+      }));
+      alert('이미지가 삭제되었습니다.');
+    } catch (error) {
+      alert('이미지 삭제에 실패했습니다: ' + error.message);
+    }
+  };
+
+  // 이미지 업로드
+  uploadImages = async () => {
+    if (this.state.selectedFiles.length === 0) return;
+    
+    if (!this.state.postId) {
+      alert('게시글을 먼저 저장해주세요.');
+      return;
+    }
+
+    console.log('이미지 업로드 시작 - PostId:', this.state.postId, '파일 수:', this.state.selectedFiles.length);
+
+    this.setState({ isUploading: true, uploadProgress: 0 });
+
+    try {
+      const uploadPromises = this.state.selectedFiles.map(async (file, index) => {
+        const result = await PostService.uploadImage(this.state.postId, file);
+        this.setState(prevState => ({
+          uploadProgress: Math.round(((index + 1) / this.state.selectedFiles.length) * 100)
+        }));
+        return result.data || result;
+      });
+
+      const uploadedResults = await Promise.all(uploadPromises);
+      
+      this.setState(prevState => ({
+        uploadedImages: [...prevState.uploadedImages, ...uploadedResults],
+        selectedFiles: [],
+        isUploading: false,
+        uploadProgress: 0
+      }));
+    } catch (error) {
+      this.setState({ isUploading: false, uploadProgress: 0 });
+      throw error; // 상위에서 처리할 수 있도록 에러를 다시 던짐
+    }
   };
 
   handleSubmit = async (e) => {
@@ -113,50 +231,35 @@ class WritePostPage extends Component {
       username: actualUsername,
     };
 
-    let url = `https://www.hhottdogg.shop/api/v1/posts`;
-    let method = 'POST';
-
-    if (postId) {
-      // If postId exists, it's an update operation
-      url = `https://www.hhottdogg.shop/api/v1/posts/${postId}`;
-      method = 'PATCH';
-    }
     try {
-      // JWT 토큰 가져오기
-      const token = getCognitoToken();
-
-      
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      
-      // 토큰이 있으면 Authorization 헤더 추가
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-
+      let result;
+      if (postId) {
+        // 게시글 수정
+        result = await PostService.updatePost(postId, postData);
       } else {
-        console.warn('⚠️ WritePostPage - 토큰이 없습니다!');
-      }
-      
-
-
-      const response = await fetch(url, {
-        method: method,
-        headers: headers,
-        body: JSON.stringify(postData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '게시글 저장에 실패했습니다.');
+        // 게시글 작성
+        result = await PostService.createPost(postData);
       }
 
-      const result = await response.json();
-
-      alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");
-      
-      // Navigate back to the main board page
-      this.props.navigate('/');
+      // 게시글 저장 후 이미지 업로드
+      if (this.state.selectedFiles.length > 0) {
+        const savedPostId = result.data?.id || result.post?.id || result.id || postId;
+        console.log('게시글 저장 결과:', result, '추출된 ID:', savedPostId);
+        this.setState({ postId: savedPostId }, async () => {
+          try {
+            await this.uploadImages();
+            alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");
+            this.props.navigate('/');
+          } catch (error) {
+            alert('게시글은 저장되었지만 이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+            // 이미지 업로드 실패해도 게시글은 저장되었으므로 이동
+            this.props.navigate('/');
+          }
+        });
+      } else {
+        alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");
+        this.props.navigate('/');
+      }
 
     } catch (error) {
       console.error('게시글 저장 오류:', error);
@@ -178,7 +281,7 @@ class WritePostPage extends Component {
 
   render() {
     const { isLoggedIn, currentUser, profileImage } = this.props;
-    const { postId, title, content, category, isLoading, error } = this.state;
+    const { postId, title, content, category, isLoading, error, selectedFiles, uploadedImages, isUploading, uploadProgress } = this.state;
 
 
 
@@ -335,6 +438,103 @@ class WritePostPage extends Component {
                 required
               />
               <span className="post-char-count">{content.length}자</span>
+            </div>
+
+            {/* 이미지 업로드 섹션 */}
+            <div className="post-form-group">
+              <label className="post-form-label">이미지 첨부</label>
+              
+              {/* 드래그 앤 드롭 영역 */}
+              <div 
+                className="image-upload-area"
+                onDrop={this.handleDrop}
+                onDragOver={this.handleDragOver}
+              >
+                <div className="upload-content">
+                  <Upload size={48} className="upload-icon" />
+                  <p>이미지를 드래그하여 놓거나 클릭하여 선택하세요</p>
+                  <p className="upload-hint">지원 형식: JPG, PNG, GIF, WebP (최대 5MB)</p>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={this.handleFileSelect}
+                    className="file-input"
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload" className="upload-button">
+                    파일 선택
+                  </label>
+                </div>
+              </div>
+
+              {/* 선택된 파일 미리보기 */}
+              {selectedFiles.length > 0 && (
+                <div className="selected-files">
+                  <h4>선택된 파일 ({selectedFiles.length}개)</h4>
+                  <div className="file-preview-grid">
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} className="file-preview-item">
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          alt={file.name}
+                          className="preview-image"
+                        />
+                        <div className="file-info">
+                          <span className="file-name">{file.name}</span>
+                          <span className="file-size">{(file.size / 1024 / 1024).toFixed(2)}MB</span>
+                        </div>
+                        <button 
+                          type="button"
+                          className="remove-file-btn"
+                          onClick={() => this.removeSelectedFile(index)}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {postId && (
+                    <button 
+                      type="button"
+                      className="upload-images-btn"
+                      onClick={this.uploadImages}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? `업로드 중... ${uploadProgress}%` : '이미지 업로드'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* 업로드된 이미지 목록 */}
+              {uploadedImages.length > 0 && (
+                <div className="uploaded-images">
+                  <h4>업로드된 이미지 ({uploadedImages.length}개)</h4>
+                  <div className="uploaded-images-grid">
+                    {uploadedImages.map((image) => (
+                      <div key={image.id} className="uploaded-image-item">
+                        <img 
+                          src={image.s3_url} 
+                          alt={image.file_name}
+                          className="uploaded-image"
+                        />
+                        <div className="image-info">
+                          <span className="image-name">{image.file_name}</span>
+                          <span className="image-size">{(image.file_size / 1024 / 1024).toFixed(2)}MB</span>
+                        </div>
+                        <button 
+                          type="button"
+                          className="remove-uploaded-btn"
+                          onClick={() => this.removeUploadedImage(image.id)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </form>
         </div>

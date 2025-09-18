@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import CommonLayout from './CommonLayout';
+import PostService from '../services/PostService';
 import "../styles/MainBoardPage.css"
 
 class MainBoardPage extends Component {
@@ -40,13 +41,9 @@ class MainBoardPage extends Component {
 
   loadPosts = async () => {
     try {
-      const response = await fetch('https://www.hhottdogg.shop/api/v1/posts');
-      if (!response.ok) {
-        throw new Error('게시글을 가져오는데 실패했습니다.');
-      }
-      const data = await response.json();
+      const result = await PostService.getPosts();
       // posts 배열이 없으면 빈 배열로 설정
-      const posts = data.posts || data.data || [];
+      const posts = result.posts || result.data || [];
       this.setState({ 
         posts: posts,
         allPosts: posts, // 원본 게시글 저장
@@ -209,10 +206,19 @@ class MainBoardPage extends Component {
                   </div>
                   <div className="table-cell title-cell">
                     <a href={`/post/${post.id}`} className="post-title-link">
-                      {post.title}
-                      {post.comment_count > 0 && (
-                        <span className="comment-count"> ({post.comment_count})</span>
-                      )}
+                      <div className="post-title-content">
+                        <span className="post-title-text">
+                          {post.title}
+                          {post.comment_count > 0 && (
+                            <span className="comment-count"> ({post.comment_count})</span>
+                          )}
+                        </span>
+                        {post.media_files && post.media_files.length > 0 && (
+                          <div className="post-image-indicator">
+                            <span className="image-count">📷 {post.media_files.length}</span>
+                          </div>
+                        )}
+                      </div>
                     </a>
                   </div>
                   <div className="table-cell author-cell">{post.username}</div>
