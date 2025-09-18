@@ -441,11 +441,21 @@ class WritePostPage extends Component {
             </div>
 
             {/* 이미지 업로드 섹션 */}
-            <div className="post-form-group">
+            <div className="post-form-group image-upload-section">
               <label className="post-form-label">이미지 첨부</label>
               
-              {/* 간단한 이미지 업로드 버튼 */}
-              <div className="simple-image-upload">
+              {/* 드래그 앤 드롭 영역 */}
+              <div 
+                className="image-upload-area"
+                onDrop={this.handleDrop}
+                onDragOver={this.handleDragOver}
+                onClick={() => document.getElementById('image-upload').click()}
+              >
+                <div className="upload-content">
+                  <Image size={48} className="upload-icon" />
+                  <p>이미지를 드래그하거나 클릭하여 선택하세요</p>
+                  <p className="upload-hint">JPG, PNG, GIF, WebP (최대 5MB)</p>
+                </div>
                 <input
                   type="file"
                   multiple
@@ -454,11 +464,15 @@ class WritePostPage extends Component {
                   className="file-input"
                   id="image-upload"
                 />
+              </div>
+              
+              {/* 또는 버튼으로 업로드 */}
+              <div className="simple-image-upload">
                 <label htmlFor="image-upload" className="simple-upload-button">
                   <Upload size={16} />
-                  이미지 선택
+                  파일 선택
                 </label>
-                <span className="upload-hint-small">JPG, PNG, GIF, WebP (최대 5MB)</span>
+                <span className="upload-hint-small">또는 버튼을 클릭하여 선택</span>
               </div>
 
               {/* 선택된 파일 미리보기 */}

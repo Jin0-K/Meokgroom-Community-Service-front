@@ -202,12 +202,22 @@
     white-space: nowrap;
 }
 
+/* 이미지 업로드 섹션 전체 스타일 */
+.image-upload-section {
+    grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
+    margin-top: 20px;
+}
+
 /* 간단한 이미지 업로드 스타일 */
 .simple-image-upload {
     display: flex;
     align-items: center;
     gap: 12px;
-    grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
+    margin-top: 12px;
+    padding: 12px;
+    background-color: var(--white-shadow);
+    border-radius: var(--radius);
+    border: 1px dashed var(--dark-navy);
 }
 
 .simple-upload-button {
@@ -236,9 +246,9 @@
     white-space: nowrap;
 }
 
-/* 기존 이미지 업로드 관련 스타일 */
+/* 드래그 앤 드롭 영역 스타일 */
 .image-upload-area {
-    border: 2px dashed var(--dark-navy);
+    border: 3px dashed var(--dark-navy);
     border-radius: var(--radius);
     padding: 40px 20px;
     text-align: center;
@@ -246,12 +256,18 @@
     transition: all 0.3s ease;
     cursor: pointer;
     margin: 12px 0;
-    grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
+    position: relative;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .image-upload-area:hover {
     border-color: var(--primary);
     background-color: rgba(59, 130, 246, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .upload-content {
@@ -263,18 +279,27 @@
 
 .upload-icon {
     color: var(--dark-navy);
-    opacity: 0.7;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.image-upload-area:hover .upload-icon {
+    color: var(--primary);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .upload-content p {
     margin: 0;
     color: var(--subtitle);
     font-size: 16px;
+    font-weight: 500;
 }
 
 .upload-hint {
     font-size: 14px !important;
     color: var(--placeholder-grey) !important;
+    font-weight: 400;
 }
 
 .file-input {
