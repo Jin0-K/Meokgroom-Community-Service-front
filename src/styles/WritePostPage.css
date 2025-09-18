@@ -212,6 +212,7 @@
     transition: all 0.3s ease;
     cursor: pointer;
     margin: 12px 0;
+    grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
 }
 
 .image-upload-area:hover {
@@ -269,6 +270,7 @@
     padding: 16px;
     background-color: var(--white-shadow);
     border-radius: var(--radius);
+    grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
 }
 
 .selected-files h4 {
@@ -371,6 +373,7 @@
     padding: 16px;
     background-color: var(--white-shadow);
     border-radius: var(--radius);
+    grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
 }
 
 .uploaded-images h4 {
