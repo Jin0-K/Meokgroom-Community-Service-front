@@ -163,8 +163,8 @@ class WritePostPage extends Component {
     if (this.state.selectedFiles.length === 0) return;
     
     if (!this.state.postId) {
-      alert('게시글을 먼저 저장해주세요.');
-      return;
+      // 게시글이 아직 저장되지 않았다면 먼저 저장
+      await this.savePostFirst();
     }
 
     console.log('이미지 업로드 시작 - PostId:', this.state.postId, '파일 수:', this.state.selectedFiles.length);
@@ -188,10 +188,58 @@ class WritePostPage extends Component {
         isUploading: false,
         uploadProgress: 0
       }));
+      
+      alert('이미지가 성공적으로 업로드되었습니다.');
     } catch (error) {
       this.setState({ isUploading: false, uploadProgress: 0 });
-      throw error; // 상위에서 처리할 수 있도록 에러를 다시 던짐
+      alert('이미지 업로드에 실패했습니다: ' + error.message);
     }
+  };
+
+  // 게시글 먼저 저장
+  savePostFirst = async () => {
+    const { title, content, category } = this.state;
+    const { currentUser } = this.props;
+
+    // 입력 내용 검증
+    if (!title.trim()) {
+      alert("게시글 제목을 입력해주세요.");
+      throw new Error('제목이 필요합니다.');
+    }
+
+    if (!content.trim()) {
+      alert("게시글 내용을 입력해주세요.");
+      throw new Error('내용이 필요합니다.');
+    }
+
+    if (content.trim().length < 5) {
+      alert("게시글은 최소 5자 이상 입력해주세요.");
+      throw new Error('내용이 너무 짧습니다.');
+    }
+
+    // JWT 토큰에서 실제 사용자 정보 추출
+    const token = getCognitoToken();
+    const tokenPayload = token ? decodeToken(token) : null;
+    const actualSub = tokenPayload?.sub || currentUser?.sub;
+    const actualUsername = tokenPayload?.cognito_username || tokenPayload?.username || currentUser?.username || 'Guest';
+
+    const postData = {
+      title,
+      content,
+      category,
+      user_id: actualSub,
+      username: actualUsername,
+    };
+
+    const result = await PostService.createPost(postData);
+    const savedPostId = result.data?.id || result.post?.id || result.id;
+    
+    if (!savedPostId) {
+      throw new Error('게시글 저장에 실패했습니다.');
+    }
+
+    this.setState({ postId: savedPostId });
+    return savedPostId;
   };
 
   handleSubmit = async (e) => {
@@ -469,14 +517,6 @@ class WritePostPage extends Component {
                 />
               </div>
               
-              {/* 또는 버튼으로 업로드 */}
-              <div className="simple-image-upload">
-                <label htmlFor="image-upload-input" className="simple-upload-button">
-                  <Upload size={16} />
-                  파일 선택
-                </label>
-                <span className="upload-hint-small">또는 버튼을 클릭하여 선택</span>
-              </div>
 
               {/* 선택된 파일 미리보기 */}
               {selectedFiles.length > 0 && (
@@ -504,16 +544,14 @@ class WritePostPage extends Component {
                       </div>
                     ))}
                   </div>
-                  {postId && (
-                    <button 
-                      type="button"
-                      className="upload-images-btn"
-                      onClick={this.uploadImages}
-                      disabled={isUploading}
-                    >
-                      {isUploading ? `업로드 중... ${uploadProgress}%` : '이미지 업로드'}
-                    </button>
-                  )}
+                  <button 
+                    type="button"
+                    className="upload-images-btn"
+                    onClick={this.uploadImages}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? `업로드 중... ${uploadProgress}%` : '이미지 업로드'}
+                  </button>
                 </div>
               )}
 

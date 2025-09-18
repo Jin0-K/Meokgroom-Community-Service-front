@@ -208,43 +208,6 @@
     margin-top: 20px;
 }
 
-/* 간단한 이미지 업로드 스타일 */
-.simple-image-upload {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 12px;
-    padding: 12px;
-    background-color: var(--white-shadow);
-    border-radius: var(--radius);
-    border: 1px dashed var(--dark-navy);
-}
-
-.simple-upload-button {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background-color: var(--dark-navy);
-    color: var(--white-shine);
-    padding: 8px 16px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border: none;
-}
-
-.simple-upload-button:hover {
-    background-color: var(--darker-navy);
-    transform: translateY(-1px);
-}
-
-.upload-hint-small {
-    font-size: 12px;
-    color: var(--placeholder-grey);
-    white-space: nowrap;
-}
 
 /* 드래그 앤 드롭 영역 스타일 */
 .image-upload-area {
