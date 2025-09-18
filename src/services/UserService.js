@@ -1,6 +1,6 @@
 class UserService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_USER_SERVICE_URL || 'https://www.hhottdogg.shop/api/v1';
+    this.baseURL = process.env.REACT_APP_USER_SERVICE_URL || 'https://api.hhottdogg.shop/api/v1';
   }
 
   // 인증 헤더 생성

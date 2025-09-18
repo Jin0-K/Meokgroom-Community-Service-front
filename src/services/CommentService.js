@@ -1,6 +1,6 @@
 class CommentService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_COMMENT_SERVICE_URL || 'https://www.hhottdogg.shop';
+    this.baseURL = process.env.REACT_APP_COMMENT_SERVICE_URL || 'https://api.hhottdogg.shop';
   }
 
   // 인증 헤더 생성

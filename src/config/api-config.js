@@ -2,7 +2,7 @@
 export const API_CONFIG = {
   // User Service
   USER_SERVICE: {
-    BASE_URL: process.env.REACT_APP_USER_SERVICE_URL || 'https://www.hhottdogg.shop/api/v1',
+    BASE_URL: process.env.REACT_APP_USER_SERVICE_URL || 'https://api.hhottdogg.shop/api/v1',
     ENDPOINTS: {
       REGISTER: '/auth/register',
       LOGIN: '/auth/login',
@@ -14,7 +14,7 @@ export const API_CONFIG = {
 
   // Post Service
   POST_SERVICE: {
-    BASE_URL: process.env.REACT_APP_POST_SERVICE_URL || 'https://www.hhottdogg.shop/api/v1',
+    BASE_URL: process.env.REACT_APP_POST_SERVICE_URL || 'https://api.hhottdogg.shop/api/v1',
     ENDPOINTS: {
       POSTS: '/posts',
       POST_DETAIL: '/posts/{postId}',
@@ -25,7 +25,7 @@ export const API_CONFIG = {
 
   // Comment Service
   COMMENT_SERVICE: {
-    BASE_URL: process.env.REACT_APP_COMMENT_SERVICE_URL || 'https://www.hhottdogg.shop/api/v1',
+    BASE_URL: process.env.REACT_APP_COMMENT_SERVICE_URL || 'https://api.hhottdogg.shop/api/v1',
     ENDPOINTS: {
       COMMENTS: '/posts/{postId}/comments',
       COMMENT_DETAIL: '/comments/{commentId}',
@@ -50,19 +50,19 @@ export const API_CONFIG = {
 export const getApiConfig = (environment = 'development') => {
   const configs = {
     development: {
-      USER_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1',
-      POST_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1',
-      COMMENT_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1'
+      USER_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1',
+      POST_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1',
+      COMMENT_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1'
     },
     staging: {
-      USER_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1',
-      POST_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1',
-      COMMENT_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1'
+      USER_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1',
+      POST_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1',
+      COMMENT_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1'
     },
     production: {
-      USER_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1',
-      POST_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1',
-      COMMENT_SERVICE_URL: 'https://www.hhottdogg.shop/api/v1'
+      USER_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1',
+      POST_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1',
+      COMMENT_SERVICE_URL: 'https://api.hhottdogg.shop/api/v1'
     }
   };
 
