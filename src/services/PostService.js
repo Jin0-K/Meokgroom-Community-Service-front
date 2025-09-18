@@ -207,8 +207,11 @@ class PostService {
   // 이미지 파일 업로드
   async uploadImage(postId, file) {
     try {
+      // 파일 안전성 확인: File/Blob 보장 및 파일명 유지
+      const blob = await this.ensureBlob(file);
+      const filename = (file && file.name) || 'upload.bin';
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', blob, filename);
 
       const headers = this.getAuthHeaders();
       // FormData 사용 시 Content-Type 헤더는 브라우저가 자동 설정하도록 제거
@@ -220,16 +223,31 @@ class PostService {
         body: formData
       });
 
+      const contentType = response.headers.get('content-type') || '';
+      const payload = contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : { message: await response.text().catch(() => '') };
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `이미지 업로드 실패: ${response.status}`);
+        throw new Error(payload.message || `이미지 업로드 실패: ${response.status}`);
       }
 
-      return await response.json();
+      return payload;
     } catch (error) {
       console.error('이미지 업로드 오류:', error);
       throw error;
     }
+  }
+
+  // dataURL/string -> Blob 변환 포함: 업로드 입력 안전장치
+  async ensureBlob(input) {
+    if (input instanceof Blob) return input;
+    if (typeof input === 'string' && input.startsWith('data:')) {
+      const res = await fetch(input);
+      return await res.blob();
+    }
+    // File API를 사용하는 브라우저에서 File은 Blob의 하위형이므로 위에서 포착됨
+    throw new Error('유효하지 않은 파일 형식입니다. File/Blob 또는 dataURL이어야 합니다.');
   }
 
   // 이미지 파일 삭제
