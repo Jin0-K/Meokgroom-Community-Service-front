@@ -252,6 +252,14 @@ class PostService {
         throw new Error(payload.message || `이미지 업로드 실패: ${response.status}`);
       }
 
+      // 백엔드 응답 구조 확인을 위한 로깅
+      console.log('PostService.uploadImage 응답:', {
+        status: response.status,
+        contentType: response.headers.get('content-type'),
+        payload: payload,
+        url: payload.s3_url || payload.url || payload.image_url || payload.file_url || payload.media_url || payload.src
+      });
+      
       return payload;
     } catch (error) {
       console.error('이미지 업로드 오류:', error);

@@ -188,6 +188,12 @@ class WritePostPage extends Component {
     try {
       const uploadPromises = this.state.selectedFiles.map(async (file, index) => {
         const result = await PostService.uploadImage(postId, file);
+        console.log('이미지 업로드 응답:', {
+          success: true,
+          data: result,
+          url: result.s3_url || result.url || result.image_url,
+          filename: result.file_name || result.filename
+        });
         this.setState(prevState => ({
           uploadProgress: Math.round(((index + 1) / this.state.selectedFiles.length) * 100)
         }));
@@ -540,19 +546,39 @@ class WritePostPage extends Component {
                   <div className="uploaded-images-grid">
                     {uploadedImages.map((image) => (
                       <div key={image.id} className="uploaded-image-item">
+                        <div className="image-loading" style={{ display: 'block', padding: '20px', textAlign: 'center', color: 'var(--subtitle)' }}>
+                          <div style={{ fontSize: '24px', marginBottom: '8px' }}>⏳</div>
+                          <p style={{ margin: '0', fontSize: '14px' }}>이미지 로딩 중...</p>
+                        </div>
                         <img 
-                          src={image.s3_url || image.url || image.image_url} 
-                          alt={image.file_name || image.filename || '이미지'}
+                          src={image.s3_url || image.url || image.image_url || image.file_url || image.media_url || image.src} 
+                          alt={image.file_name || image.filename || image.name || '이미지'}
                           className="uploaded-image"
+                          style={{ display: 'none' }}
                           onError={(e) => {
+                            console.error('이미지 로드 실패:', {
+                              imageData: image,
+                              attemptedUrl: e.target.src,
+                              error: 'Failed to load image'
+                            });
                             e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'block';
+                            e.target.previousSibling.style.display = 'none'; // 로딩 숨기기
+                            e.target.nextSibling.style.display = 'block'; // 에러 표시
+                          }}
+                          onLoad={(e) => {
+                            console.log('이미지 로드 성공:', image.s3_url || image.url || image.image_url);
+                            e.target.style.display = 'block';
+                            e.target.previousSibling.style.display = 'none'; // 로딩 숨기기
                           }}
                         />
-                        <div className="image-error" style={{ display: 'none', padding: '20px', textAlign: 'center', color: 'var(--subtitle)' }}>
-                          <p>이미지를 불러올 수 없습니다</p>
-                          <p style={{ fontSize: '12px', marginTop: '8px' }}>
+                        <div className="image-error" style={{ display: 'none', padding: '20px', textAlign: 'center', color: 'var(--subtitle)', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+                          <div style={{ fontSize: '24px', marginBottom: '8px' }}>📷</div>
+                          <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>이미지를 불러올 수 없습니다</p>
+                          <p style={{ fontSize: '12px', margin: '0 0 4px 0', color: '#6c757d' }}>
                             파일명: {image.file_name || image.filename || '알 수 없음'}
+                          </p>
+                          <p style={{ fontSize: '11px', margin: '0', color: '#adb5bd' }}>
+                            URL: {image.s3_url || image.url || image.image_url || 'URL 없음'}
                           </p>
                         </div>
                         <div className="image-info">
