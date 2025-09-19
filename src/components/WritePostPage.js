@@ -76,7 +76,6 @@ class WritePostPage extends Component {
         });
       }
     } catch (error) {
-      console.error('게시글 로드 오류:', error);
       this.setState({
         error: error.message,
         isLoading: false
@@ -146,7 +145,13 @@ class WritePostPage extends Component {
   // 업로드된 이미지 제거
   removeUploadedImage = async (mediaId) => {
     const postId = this.state.postId;
-    if (!postId || postId === 'null' || postId === null) {
+    if (!postId || postId === 'null' || postId === null || postId === undefined || postId === 'undefined') {
+      alert('게시글 ID가 유효하지 않습니다.');
+      return;
+    }
+
+    // postId가 빈 문자열인지 확인
+    if (typeof postId === 'string' && postId.trim() === '') {
       alert('게시글 ID가 유효하지 않습니다.');
       return;
     }
@@ -162,41 +167,27 @@ class WritePostPage extends Component {
     }
   };
 
-  // 이미지 업로드
-  uploadImages = async () => {
+  // 이미지 업로드 (postId 직접 전달)
+  uploadImagesWithPostId = async (postId) => {
     if (this.state.selectedFiles.length === 0) return;
     
-    let currentPostId = this.state.postId;
-    
-    if (!currentPostId) {
-      // 게시글이 아직 저장되지 않았다면 먼저 저장
-      try {
-        currentPostId = await this.savePostFirst();
-      } catch (error) {
-        alert('게시글 저장에 실패했습니다: ' + error.message);
-        return;
-      }
-    }
-
     // postId 검증 - 더 엄격하게
-    if (!currentPostId || currentPostId === 'null' || currentPostId === null) {
+    if (!postId || postId === 'null' || postId === null || postId === undefined || postId === 'undefined') {
       alert('게시글 ID를 가져올 수 없습니다. 다시 시도해주세요.');
-      console.error('PostId 검증 실패:', currentPostId);
       return;
     }
 
-    console.log('이미지 업로드 시작 - PostId:', currentPostId, '파일 수:', this.state.selectedFiles.length);
+    // postId가 빈 문자열인지 확인
+    if (typeof postId === 'string' && postId.trim() === '') {
+      alert('게시글 ID가 유효하지 않습니다. 다시 시도해주세요.');
+      return;
+    }
 
     this.setState({ isUploading: true, uploadProgress: 0 });
 
     try {
       const uploadPromises = this.state.selectedFiles.map(async (file, index) => {
-        // 각 파일 업로드 전에 다시 한번 postId 검증
-        if (!currentPostId || currentPostId === 'null' || currentPostId === null) {
-          throw new Error('유효하지 않은 게시글 ID입니다.');
-        }
-        
-        const result = await PostService.uploadImage(currentPostId, file);
+        const result = await PostService.uploadImage(postId, file);
         this.setState(prevState => ({
           uploadProgress: Math.round(((index + 1) / this.state.selectedFiles.length) * 100)
         }));
@@ -219,55 +210,7 @@ class WritePostPage extends Component {
     }
   };
 
-  // 게시글 먼저 저장
-  savePostFirst = async () => {
-    const { title, content, category } = this.state;
-    const { currentUser } = this.props;
 
-    // 입력 내용 검증
-    if (!title.trim()) {
-      alert("게시글 제목을 입력해주세요.");
-      throw new Error('제목이 필요합니다.');
-    }
-
-    if (!content.trim()) {
-      alert("게시글 내용을 입력해주세요.");
-      throw new Error('내용이 필요합니다.');
-    }
-
-    if (content.trim().length < 5) {
-      alert("게시글은 최소 5자 이상 입력해주세요.");
-      throw new Error('내용이 너무 짧습니다.');
-    }
-
-    // JWT 토큰에서 실제 사용자 정보 추출
-    const token = getCognitoToken();
-    const tokenPayload = token ? decodeToken(token) : null;
-    const actualSub = tokenPayload?.sub || currentUser?.sub;
-    const actualUsername = tokenPayload?.cognito_username || tokenPayload?.username || currentUser?.username || 'Guest';
-
-    const postData = {
-      title,
-      content,
-      category,
-      user_id: actualSub,
-      username: actualUsername,
-    };
-
-    const result = await PostService.createPost(postData);
-    console.log('게시글 생성 응답:', result);
-    
-    // 다양한 응답 구조에서 ID 추출 시도
-    const savedPostId = result.data?.id || result.post?.id || result.id || result.post_id;
-    
-    if (!savedPostId) {
-      console.error('게시글 ID 추출 실패:', result);
-      throw new Error('게시글 저장에 실패했습니다. 응답에서 ID를 찾을 수 없습니다.');
-    }
-
-    this.setState({ postId: savedPostId });
-    return savedPostId;
-  };
 
   handleSubmit = async (e) => {
     e.preventDefault();
@@ -321,35 +264,40 @@ class WritePostPage extends Component {
       // 게시글 저장 후 이미지 업로드
       if (this.state.selectedFiles.length > 0) {
         const savedPostId = result.data?.id || result.post?.id || result.id || result.post_id;
-        console.log('게시글 저장 결과:', result, '추출된 ID:', savedPostId);
         
         // postId가 있는 경우(수정 모드)와 없는 경우(새 작성) 모두 처리
         const finalPostId = savedPostId || postId;
         
-        if (!finalPostId || finalPostId === 'null' || finalPostId === null) {
+        if (!finalPostId || finalPostId === 'null' || finalPostId === null || finalPostId === undefined || finalPostId === 'undefined') {
           alert('게시글은 저장되었지만 ID를 가져올 수 없어 이미지 업로드를 건너뜁니다.');
           this.props.navigate('/');
           return;
         }
+
+        // postId가 빈 문자열인지 확인
+        if (typeof finalPostId === 'string' && finalPostId.trim() === '') {
+          alert('게시글은 저장되었지만 ID가 유효하지 않아 이미지 업로드를 건너뜁니다.');
+          this.props.navigate('/');
+          return;
+        }
         
-        this.setState({ postId: finalPostId }, async () => {
-          try {
-            await this.uploadImages();
-            alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");
-            this.props.navigate('/');
-          } catch (error) {
-            alert('게시글은 저장되었지만 이미지 업로드에 실패했습니다. 다시 시도해주세요.');
-            // 이미지 업로드 실패해도 게시글은 저장되었으므로 이동
-            this.props.navigate('/');
-          }
-        });
+        // postId를 상태에 설정하고 이미지 업로드
+        this.setState({ postId: finalPostId });
+        
+        try {
+          await this.uploadImagesWithPostId(finalPostId);
+          alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");
+          this.props.navigate('/');
+        } catch (error) {
+          alert('게시글은 저장되었지만 이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+          this.props.navigate('/');
+        }
       } else {
         alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");
         this.props.navigate('/');
       }
 
     } catch (error) {
-      console.error('게시글 저장 오류:', error);
       this.setState({ error: error.message });
     } finally {
       this.setState({ isLoading: false });
@@ -559,6 +507,7 @@ class WritePostPage extends Component {
               {selectedFiles.length > 0 && (
                 <div className="selected-files">
                   <h4>선택된 파일 ({selectedFiles.length}개)</h4>
+                  <p className="upload-hint-text">저장 버튼을 클릭하면 이미지가 업로드됩니다.</p>
                   <div className="file-preview-grid">
                     {selectedFiles.map((file, index) => (
                       <div key={index} className="file-preview-item">
@@ -581,14 +530,6 @@ class WritePostPage extends Component {
                       </div>
                     ))}
                   </div>
-                  <button 
-                    type="button"
-                    className="upload-images-btn"
-                    onClick={this.uploadImages}
-                    disabled={isUploading}
-                  >
-                    {isUploading ? `업로드 중... ${uploadProgress}%` : '이미지 업로드'}
-                  </button>
                 </div>
               )}
 
@@ -600,13 +541,25 @@ class WritePostPage extends Component {
                     {uploadedImages.map((image) => (
                       <div key={image.id} className="uploaded-image-item">
                         <img 
-                          src={image.s3_url} 
-                          alt={image.file_name}
+                          src={image.s3_url || image.url || image.image_url} 
+                          alt={image.file_name || image.filename || '이미지'}
                           className="uploaded-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
                         />
+                        <div className="image-error" style={{ display: 'none', padding: '20px', textAlign: 'center', color: 'var(--subtitle)' }}>
+                          <p>이미지를 불러올 수 없습니다</p>
+                          <p style={{ fontSize: '12px', marginTop: '8px' }}>
+                            파일명: {image.file_name || image.filename || '알 수 없음'}
+                          </p>
+                        </div>
                         <div className="image-info">
-                          <span className="image-name">{image.file_name}</span>
-                          <span className="image-size">{(image.file_size / 1024 / 1024).toFixed(2)}MB</span>
+                          <span className="image-name">{image.file_name || image.filename || '이미지'}</span>
+                          <span className="image-size">
+                            {image.file_size ? (image.file_size / 1024 / 1024).toFixed(2) + 'MB' : '크기 정보 없음'}
+                          </span>
                         </div>
                         <button 
                           type="button"

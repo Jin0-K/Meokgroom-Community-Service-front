@@ -513,14 +513,26 @@ class PostDetails extends Component {
                     {post.media_files.map((media) => (
                       <div key={media.id} className="post-image-item">
                         <img 
-                          src={media.s3_url} 
-                          alt={media.file_name}
+                          src={media.s3_url || media.url || media.image_url} 
+                          alt={media.file_name || media.filename || '이미지'}
                           className="post-image"
-                          onClick={() => window.open(media.s3_url, '_blank')}
+                          onClick={() => window.open(media.s3_url || media.url || media.image_url, '_blank')}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
                         />
+                        <div className="image-error" style={{ display: 'none', padding: '20px', textAlign: 'center', color: 'var(--subtitle)' }}>
+                          <p>이미지를 불러올 수 없습니다</p>
+                          <p style={{ fontSize: '12px', marginTop: '8px' }}>
+                            파일명: {media.file_name || media.filename || '알 수 없음'}
+                          </p>
+                        </div>
                         <div className="image-caption">
-                          <span className="image-name">{media.file_name}</span>
-                          <span className="image-size">{(media.file_size / 1024 / 1024).toFixed(2)}MB</span>
+                          <span className="image-name">{media.file_name || media.filename || '이미지'}</span>
+                          <span className="image-size">
+                            {media.file_size ? (media.file_size / 1024 / 1024).toFixed(2) + 'MB' : '크기 정보 없음'}
+                          </span>
                         </div>
                       </div>
                     ))}

@@ -207,9 +207,14 @@ class PostService {
   // 이미지 파일 업로드
   async uploadImage(postId, file) {
     try {
-      // postId 검증
-      if (!postId || postId === 'null' || postId === null) {
-        throw new Error('유효하지 않은 게시글 ID입니다. postId가 null입니다.');
+      // postId 검증 - 더 엄격하게
+      if (!postId || postId === 'null' || postId === null || postId === undefined || postId === 'undefined') {
+        throw new Error('유효하지 않은 게시글 ID입니다. postId가 null 또는 undefined입니다.');
+      }
+
+      // postId가 숫자나 유효한 문자열인지 확인
+      if (typeof postId === 'string' && postId.trim() === '') {
+        throw new Error('유효하지 않은 게시글 ID입니다. postId가 빈 문자열입니다.');
       }
 
       // 파일 검증
@@ -217,7 +222,7 @@ class PostService {
         throw new Error('업로드할 파일이 없습니다.');
       }
 
-      console.log('PostService.uploadImage 호출 - postId:', postId, 'file:', file.name);
+      console.log('PostService.uploadImage 호출 - postId:', postId, '타입:', typeof postId, 'file:', file.name);
 
       // 파일 안전성 확인: File/Blob 보장 및 파일명 유지
       const blob = await this.ensureBlob(file);
@@ -268,14 +273,24 @@ class PostService {
   // 이미지 파일 삭제
   async deleteImage(postId, mediaId) {
     try {
-      // postId 검증
-      if (!postId || postId === 'null' || postId === null) {
-        throw new Error('유효하지 않은 게시글 ID입니다. postId가 null입니다.');
+      // postId 검증 - 더 엄격하게
+      if (!postId || postId === 'null' || postId === null || postId === undefined || postId === 'undefined') {
+        throw new Error('유효하지 않은 게시글 ID입니다. postId가 null 또는 undefined입니다.');
       }
 
-      // mediaId 검증
-      if (!mediaId || mediaId === 'null' || mediaId === null) {
+      // postId가 빈 문자열인지 확인
+      if (typeof postId === 'string' && postId.trim() === '') {
+        throw new Error('유효하지 않은 게시글 ID입니다. postId가 빈 문자열입니다.');
+      }
+
+      // mediaId 검증 - 더 엄격하게
+      if (!mediaId || mediaId === 'null' || mediaId === null || mediaId === undefined || mediaId === 'undefined') {
         throw new Error('유효하지 않은 미디어 ID입니다.');
+      }
+
+      // mediaId가 빈 문자열인지 확인
+      if (typeof mediaId === 'string' && mediaId.trim() === '') {
+        throw new Error('유효하지 않은 미디어 ID입니다. mediaId가 빈 문자열입니다.');
       }
 
       console.log('PostService.deleteImage 호출 - postId:', postId, 'mediaId:', mediaId);

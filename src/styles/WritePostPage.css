@@ -296,9 +296,16 @@
 }
 
 .selected-files h4 {
-    margin: 0 0 16px 0;
+    margin: 0 0 8px 0;
     color: var(--title);
     font-size: 16px;
+}
+
+.upload-hint-text {
+    margin: 0 0 16px 0;
+    color: var(--subtitle);
+    font-size: 14px;
+    font-style: italic;
 }
 
 .file-preview-grid {
@@ -424,6 +431,12 @@
     object-fit: cover;
     border-radius: var(--radius);
     margin-bottom: 8px;
+    display: block;
+}
+
+.uploaded-image[src=""], 
+.uploaded-image:not([src]) {
+    display: none;
 }
 
 .image-info {
