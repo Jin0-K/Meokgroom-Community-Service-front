@@ -145,10 +145,14 @@ class WritePostPage extends Component {
 
   // 업로드된 이미지 제거
   removeUploadedImage = async (mediaId) => {
-    if (!this.state.postId) return;
+    const postId = this.state.postId;
+    if (!postId || postId === 'null' || postId === null) {
+      alert('게시글 ID가 유효하지 않습니다.');
+      return;
+    }
     
     try {
-      await PostService.deleteImage(this.state.postId, mediaId);
+      await PostService.deleteImage(postId, mediaId);
       this.setState(prevState => ({
         uploadedImages: prevState.uploadedImages.filter(img => img.id !== mediaId)
       }));
@@ -162,18 +166,37 @@ class WritePostPage extends Component {
   uploadImages = async () => {
     if (this.state.selectedFiles.length === 0) return;
     
-    if (!this.state.postId) {
+    let currentPostId = this.state.postId;
+    
+    if (!currentPostId) {
       // 게시글이 아직 저장되지 않았다면 먼저 저장
-      await this.savePostFirst();
+      try {
+        currentPostId = await this.savePostFirst();
+      } catch (error) {
+        alert('게시글 저장에 실패했습니다: ' + error.message);
+        return;
+      }
     }
 
-    console.log('이미지 업로드 시작 - PostId:', this.state.postId, '파일 수:', this.state.selectedFiles.length);
+    // postId 검증 - 더 엄격하게
+    if (!currentPostId || currentPostId === 'null' || currentPostId === null) {
+      alert('게시글 ID를 가져올 수 없습니다. 다시 시도해주세요.');
+      console.error('PostId 검증 실패:', currentPostId);
+      return;
+    }
+
+    console.log('이미지 업로드 시작 - PostId:', currentPostId, '파일 수:', this.state.selectedFiles.length);
 
     this.setState({ isUploading: true, uploadProgress: 0 });
 
     try {
       const uploadPromises = this.state.selectedFiles.map(async (file, index) => {
-        const result = await PostService.uploadImage(this.state.postId, file);
+        // 각 파일 업로드 전에 다시 한번 postId 검증
+        if (!currentPostId || currentPostId === 'null' || currentPostId === null) {
+          throw new Error('유효하지 않은 게시글 ID입니다.');
+        }
+        
+        const result = await PostService.uploadImage(currentPostId, file);
         this.setState(prevState => ({
           uploadProgress: Math.round(((index + 1) / this.state.selectedFiles.length) * 100)
         }));
@@ -232,10 +255,14 @@ class WritePostPage extends Component {
     };
 
     const result = await PostService.createPost(postData);
-    const savedPostId = result.data?.id || result.post?.id || result.id;
+    console.log('게시글 생성 응답:', result);
+    
+    // 다양한 응답 구조에서 ID 추출 시도
+    const savedPostId = result.data?.id || result.post?.id || result.id || result.post_id;
     
     if (!savedPostId) {
-      throw new Error('게시글 저장에 실패했습니다.');
+      console.error('게시글 ID 추출 실패:', result);
+      throw new Error('게시글 저장에 실패했습니다. 응답에서 ID를 찾을 수 없습니다.');
     }
 
     this.setState({ postId: savedPostId });
@@ -293,9 +320,19 @@ class WritePostPage extends Component {
 
       // 게시글 저장 후 이미지 업로드
       if (this.state.selectedFiles.length > 0) {
-        const savedPostId = result.data?.id || result.post?.id || result.id || postId;
+        const savedPostId = result.data?.id || result.post?.id || result.id || result.post_id;
         console.log('게시글 저장 결과:', result, '추출된 ID:', savedPostId);
-        this.setState({ postId: savedPostId }, async () => {
+        
+        // postId가 있는 경우(수정 모드)와 없는 경우(새 작성) 모두 처리
+        const finalPostId = savedPostId || postId;
+        
+        if (!finalPostId || finalPostId === 'null' || finalPostId === null) {
+          alert('게시글은 저장되었지만 ID를 가져올 수 없어 이미지 업로드를 건너뜁니다.');
+          this.props.navigate('/');
+          return;
+        }
+        
+        this.setState({ postId: finalPostId }, async () => {
           try {
             await this.uploadImages();
             alert(postId ? "게시글이 성공적으로 수정되었습니다." : "게시글이 성공적으로 작성되었습니다.");

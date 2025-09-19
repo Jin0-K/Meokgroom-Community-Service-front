@@ -207,6 +207,18 @@ class PostService {
   // 이미지 파일 업로드
   async uploadImage(postId, file) {
     try {
+      // postId 검증
+      if (!postId || postId === 'null' || postId === null) {
+        throw new Error('유효하지 않은 게시글 ID입니다. postId가 null입니다.');
+      }
+
+      // 파일 검증
+      if (!file) {
+        throw new Error('업로드할 파일이 없습니다.');
+      }
+
+      console.log('PostService.uploadImage 호출 - postId:', postId, 'file:', file.name);
+
       // 파일 안전성 확인: File/Blob 보장 및 파일명 유지
       const blob = await this.ensureBlob(file);
       const filename = (file && file.name) || 'upload.bin';
@@ -217,7 +229,10 @@ class PostService {
       // FormData 사용 시 Content-Type 헤더는 브라우저가 자동 설정하도록 제거
       delete headers['Content-Type'];
 
-      const response = await fetch(`${this.baseURL}/posts/${postId}/media`, {
+      const url = `${this.baseURL}/posts/${postId}/media`;
+      console.log('업로드 URL:', url);
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: headers,
         body: formData
@@ -253,7 +268,22 @@ class PostService {
   // 이미지 파일 삭제
   async deleteImage(postId, mediaId) {
     try {
-      const response = await fetch(`${this.baseURL}/posts/${postId}/media/${mediaId}`, {
+      // postId 검증
+      if (!postId || postId === 'null' || postId === null) {
+        throw new Error('유효하지 않은 게시글 ID입니다. postId가 null입니다.');
+      }
+
+      // mediaId 검증
+      if (!mediaId || mediaId === 'null' || mediaId === null) {
+        throw new Error('유효하지 않은 미디어 ID입니다.');
+      }
+
+      console.log('PostService.deleteImage 호출 - postId:', postId, 'mediaId:', mediaId);
+
+      const url = `${this.baseURL}/posts/${postId}/media/${mediaId}`;
+      console.log('삭제 URL:', url);
+
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       });
