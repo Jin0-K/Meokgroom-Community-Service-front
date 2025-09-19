@@ -146,7 +146,17 @@
   color: var(--muted-foreground);
   font-size: 13px;
   font-weight: 400;
-  margin-left: 4px;
+  margin-left: 8px;
+}
+
+.image-count {
+  font-size: 12px;
+  color: var(--subtitle);
+  background-color: var(--white-shadow);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 500;
+  margin-left: 8px;
 }
 
 /* Specific styling for the category tag */
@@ -227,26 +237,12 @@
 /* 게시글 제목과 이미지 표시 스타일 */
 .post-title-content {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
 }
 
 .post-title-text {
-  display: block;
+  display: inline;
 }
 
-.post-image-indicator {
-  display: flex;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.image-count {
-  font-size: 12px;
-  color: var(--subtitle);
-  background-color: var(--white-shadow);
-  padding: 2px 6px;
-  border-radius: 12px;
-  font-weight: 500;
-}
 

@@ -36,12 +36,18 @@ class PostService {
     try {
       const queryParams = new URLSearchParams();
       
+      // 백엔드 API 파라미터와 매핑
       if (params.page) queryParams.append('page', params.page);
-      if (params.size) queryParams.append('size', params.size);
-      if (params.category) queryParams.append('category', params.category);
-      if (params.search) queryParams.append('search', params.search);
-      if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-      if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+      if (params.per_page) queryParams.append('per_page', params.per_page);
+      if (params.size) queryParams.append('per_page', params.size); // size를 per_page로 매핑
+      if (params.q) queryParams.append('q', params.q);
+      if (params.search) queryParams.append('q', params.search); // search를 q로 매핑
+      if (params.category_id) queryParams.append('category_id', params.category_id);
+      if (params.category) queryParams.append('category_id', params.category); // category를 category_id로 매핑
+      if (params.user_id) queryParams.append('user_id', params.user_id);
+      if (params.sort) queryParams.append('sort', params.sort);
+      if (params.sortBy) queryParams.append('sort', params.sortBy); // sortBy를 sort로 매핑
+      if (params.sortOrder) queryParams.append('sort_order', params.sortOrder);
 
       const url = `${this.baseURL}/posts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       
@@ -226,9 +232,14 @@ class PostService {
 
       // 파일 안전성 확인: File/Blob 보장 및 파일명 유지
       const blob = await this.ensureBlob(file);
-      const filename = (file && file.name) || 'upload.bin';
+      // 고유한 파일명 생성 (타임스탬프 + 원본 파일명)
+      const timestamp = Date.now();
+      const originalName = (file && file.name) || 'upload.bin';
+      const filename = `${timestamp}_${originalName}`;
       const formData = new FormData();
       formData.append('file', blob, filename);
+      
+      console.log('업로드할 파일명:', filename, '원본:', originalName);
 
       const headers = this.getAuthHeaders();
       // FormData 사용 시 Content-Type 헤더는 브라우저가 자동 설정하도록 제거
@@ -337,6 +348,25 @@ class PostService {
     }
     
     return true;
+  }
+
+  // 댓글 수 업데이트 (백엔드 API와 통합)
+  async updateCommentCount(postId) {
+    try {
+      const response = await fetch(`${this.baseURL}/posts/${postId}/update-comment-count`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`댓글 수 업데이트 실패: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('댓글 수 업데이트 오류:', error);
+      throw error;
+    }
   }
 }
 

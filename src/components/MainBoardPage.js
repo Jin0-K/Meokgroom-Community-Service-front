@@ -42,8 +42,19 @@ class MainBoardPage extends Component {
   loadPosts = async () => {
     try {
       const result = await PostService.getPosts();
-      // posts 배열이 없으면 빈 배열로 설정
-      const posts = result.posts || result.data || [];
+      
+      // 백엔드 API 응답 구조에 맞게 데이터 추출
+      // result.data가 배열인 경우 (게시글 목록)
+      // result.posts가 배열인 경우 (기존 구조)
+      const posts = result.data || result.posts || [];
+      
+      // 백엔드 응답 구조 확인 (임시 로깅)
+      console.log('백엔드 응답 구조:', result);
+      if (posts.length > 0) {
+        console.log('첫 번째 게시글 데이터:', posts[0]);
+        console.log('댓글 수 필드:', posts[0].comment_count);
+      }
+      
       this.setState({ 
         posts: posts,
         allPosts: posts, // 원본 게시글 저장
@@ -212,12 +223,10 @@ class MainBoardPage extends Component {
                           {post.comment_count > 0 && (
                             <span className="comment-count"> ({post.comment_count})</span>
                           )}
+                          {post.media_files && post.media_files.length > 0 && (
+                            <span className="image-count"> 📷 {post.media_files.length}</span>
+                          )}
                         </span>
-                        {post.media_files && post.media_files.length > 0 && (
-                          <div className="post-image-indicator">
-                            <span className="image-count">📷 {post.media_files.length}</span>
-                          </div>
-                        )}
                       </div>
                     </a>
                   </div>

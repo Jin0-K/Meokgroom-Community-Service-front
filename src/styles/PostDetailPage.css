@@ -395,16 +395,7 @@
 
 /* 게시글 이미지 스타일 */
 .post-images {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
-
-.post-images h3 {
-  margin: 0 0 16px 0;
-  color: var(--subtitle);
-  font-size: 18px;
-  font-weight: 600;
+  margin-top: 20px;
 }
 
 .post-images-grid {

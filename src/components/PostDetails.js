@@ -508,24 +508,35 @@ class PostDetails extends Component {
               {/* 게시글 이미지 */}
               {post.media_files && post.media_files.length > 0 && (
                 <div className="post-images">
-                  <h3>첨부 이미지 ({post.media_files.length}개)</h3>
                   <div className="post-images-grid">
                     {post.media_files.map((media) => (
                       <div key={media.id} className="post-image-item">
                         <img 
-                          src={media.s3_url || media.url || media.image_url} 
-                          alt={media.file_name || media.filename || '이미지'}
+                          src={media.s3_url || media.url || media.image_url || media.file_url || media.media_url || media.src} 
+                          alt={media.file_name || media.filename || media.name || '이미지'}
                           className="post-image"
-                          onClick={() => window.open(media.s3_url || media.url || media.image_url, '_blank')}
+                          onClick={() => window.open(media.s3_url || media.url || media.image_url || media.file_url || media.media_url || media.src, '_blank')}
                           onError={(e) => {
+                            console.error('PostDetails 이미지 로드 실패:', {
+                              imageData: media,
+                              attemptedUrl: e.target.src,
+                              error: 'Failed to load image'
+                            });
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'block';
                           }}
+                          onLoad={() => {
+                            console.log('PostDetails 이미지 로드 성공:', media.s3_url || media.url || media.image_url);
+                          }}
                         />
-                        <div className="image-error" style={{ display: 'none', padding: '20px', textAlign: 'center', color: 'var(--subtitle)' }}>
-                          <p>이미지를 불러올 수 없습니다</p>
-                          <p style={{ fontSize: '12px', marginTop: '8px' }}>
-                            파일명: {media.file_name || media.filename || '알 수 없음'}
+                        <div className="image-error" style={{ display: 'none', padding: '20px', textAlign: 'center', color: 'var(--subtitle)', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+                          <div style={{ fontSize: '24px', marginBottom: '8px' }}>📷</div>
+                          <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>이미지를 불러올 수 없습니다</p>
+                          <p style={{ fontSize: '12px', margin: '0 0 4px 0', color: '#6c757d' }}>
+                            파일명: {media.file_name || media.filename || media.name || '알 수 없음'}
+                          </p>
+                          <p style={{ fontSize: '11px', margin: '0', color: '#adb5bd' }}>
+                            URL: {media.s3_url || media.url || media.image_url || media.file_url || media.media_url || media.src || 'URL 없음'}
                           </p>
                         </div>
                         <div className="image-caption">

@@ -93,20 +93,28 @@ class WritePostPage extends Component {
     const files = Array.from(e.target.files);
     const validFiles = [];
     
-    files.forEach(file => {
+    console.log('파일 선택됨:', files.length, '개 파일');
+    
+    files.forEach((file, index) => {
       try {
         PostService.validateImageFile(file);
         validFiles.push(file);
+        console.log(`파일 ${index + 1} 검증 성공:`, file.name);
       } catch (error) {
+        console.error(`파일 ${index + 1} 검증 실패:`, file.name, error.message);
         alert(error.message);
       }
     });
     
     if (validFiles.length > 0) {
+      console.log('유효한 파일들:', validFiles.map(f => f.name));
       this.setState(prevState => ({
         selectedFiles: [...prevState.selectedFiles, ...validFiles]
       }));
     }
+    
+    // 파일 입력 초기화 (같은 파일 재선택 가능하도록)
+    e.target.value = '';
   };
 
   // 드래그 앤 드롭 핸들러
@@ -115,16 +123,21 @@ class WritePostPage extends Component {
     const files = Array.from(e.dataTransfer.files);
     const validFiles = [];
     
-    files.forEach(file => {
+    console.log('드래그 앤 드롭으로 파일 선택됨:', files.length, '개 파일');
+    
+    files.forEach((file, index) => {
       try {
         PostService.validateImageFile(file);
         validFiles.push(file);
+        console.log(`드래그 파일 ${index + 1} 검증 성공:`, file.name);
       } catch (error) {
+        console.error(`드래그 파일 ${index + 1} 검증 실패:`, file.name, error.message);
         alert(error.message);
       }
     });
     
     if (validFiles.length > 0) {
+      console.log('드래그로 유효한 파일들:', validFiles.map(f => f.name));
       this.setState(prevState => ({
         selectedFiles: [...prevState.selectedFiles, ...validFiles]
       }));
@@ -186,21 +199,42 @@ class WritePostPage extends Component {
     this.setState({ isUploading: true, uploadProgress: 0 });
 
     try {
-      const uploadPromises = this.state.selectedFiles.map(async (file, index) => {
-        const result = await PostService.uploadImage(postId, file);
-        console.log('이미지 업로드 응답:', {
-          success: true,
-          data: result,
-          url: result.s3_url || result.url || result.image_url,
-          filename: result.file_name || result.filename
-        });
-        this.setState(prevState => ({
-          uploadProgress: Math.round(((index + 1) / this.state.selectedFiles.length) * 100)
-        }));
-        return result.data || result;
-      });
+      const filesToUpload = [...this.state.selectedFiles]; // 복사본 생성
+      const uploadedResults = [];
+      let successCount = 0;
+      let failCount = 0;
 
-      const uploadedResults = await Promise.all(uploadPromises);
+      console.log(`총 ${filesToUpload.length}개 파일 업로드 시작`);
+
+      // 순차적으로 업로드하여 각각의 결과를 추적
+      for (let index = 0; index < filesToUpload.length; index++) {
+        const file = filesToUpload[index];
+        try {
+          console.log(`이미지 ${index + 1}/${filesToUpload.length} 업로드 시작:`, file.name);
+          
+          const result = await PostService.uploadImage(postId, file);
+          console.log(`이미지 ${index + 1} 업로드 성공:`, {
+            filename: file.name,
+            result: result,
+            url: result.s3_url || result.url || result.image_url
+          });
+          
+          uploadedResults.push(result.data || result);
+          successCount++;
+          
+          // 진행률 업데이트
+          this.setState(prevState => ({
+            uploadProgress: Math.round(((index + 1) / filesToUpload.length) * 100)
+          }));
+          
+        } catch (error) {
+          console.error(`이미지 ${index + 1} 업로드 실패:`, file.name, error);
+          failCount++;
+          // 개별 실패는 전체를 중단시키지 않음
+        }
+      }
+
+      console.log(`업로드 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
       
       this.setState(prevState => ({
         uploadedImages: [...prevState.uploadedImages, ...uploadedResults],
@@ -209,7 +243,14 @@ class WritePostPage extends Component {
         uploadProgress: 0
       }));
       
-      alert('이미지가 성공적으로 업로드되었습니다.');
+      // 결과 알림
+      if (successCount > 0 && failCount === 0) {
+        alert(`${successCount}개 이미지가 성공적으로 업로드되었습니다.`);
+      } else if (successCount > 0 && failCount > 0) {
+        alert(`${successCount}개 이미지 업로드 성공, ${failCount}개 실패했습니다.`);
+      } else {
+        alert('이미지 업로드에 실패했습니다.');
+      }
     } catch (error) {
       this.setState({ isUploading: false, uploadProgress: 0 });
       alert('이미지 업로드에 실패했습니다: ' + error.message);
@@ -542,7 +583,6 @@ class WritePostPage extends Component {
               {/* 업로드된 이미지 목록 */}
               {uploadedImages.length > 0 && (
                 <div className="uploaded-images">
-                  <h4>업로드된 이미지 ({uploadedImages.length}개)</h4>
                   <div className="uploaded-images-grid">
                     {uploadedImages.map((image) => (
                       <div key={image.id} className="uploaded-image-item">

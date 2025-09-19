@@ -399,16 +399,7 @@
 /* 업로드된 이미지 목록 */
 .uploaded-images {
     margin-top: 20px;
-    padding: 16px;
-    background-color: var(--white-shadow);
-    border-radius: var(--radius);
     grid-column: 1 / -1; /* 전체 그리드 컬럼 차지 */
-}
-
-.uploaded-images h4 {
-    margin: 0 0 16px 0;
-    color: var(--title);
-    font-size: 16px;
 }
 
 .uploaded-images-grid {
